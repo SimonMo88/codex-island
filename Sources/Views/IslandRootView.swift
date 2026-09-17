@@ -472,7 +472,7 @@ private struct PeekPillOverlay: View {
         switch provider {
         case .claude: return usageStore.claude.fiveHour
         case .codex:  return usageStore.codex.peekWindow
-        case .grok, .antigravity:
+        case .grok, .antigravity, .cursor:
             return connections.primary(provider)?.window ?? .unknown
         }
     }

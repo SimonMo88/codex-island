@@ -71,6 +71,31 @@ is stored under hashed account and metric identifiers; an unidentified session
 does not write persistent quota history. A removed custom group stays unavailable
 until the user selects another group or restores defaults.
 
+## Cursor
+
+Sign in with the Cursor desktop app. The CLI (`agent login`) is enough only
+when it has already written `cursor-access-token` to the keychain. Settings
+opens Cursor when installed, or the download page when it is missing. After
+signing in, choose Refresh connection.
+
+The adapter reads `cursorAuth/accessToken` from
+`~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`
+without writing it, then falls back to the `cursor-access-token` keychain
+item. On expiry or HTTP 401 it re-reads that store once in case Cursor has
+already rotated the JWT, then retries. It never calls Cursor's OAuth token
+endpoint and never writes the desktop database or keychain. Failed reads
+surface as a sign-in state; HTTP 403 is not treated as proof of logout.
+
+`GetCurrentPeriodUsage` supplies Agent (named-model / `apiPercentUsed`) and
+Auto (`autoPercentUsed`) percentages for the current billing cycle, plus
+included spend when a limit is present. Agent is the default peek and alert
+window. Settings can show Auto, included spend, or on-demand spend instead.
+Zero-percent windows remain visible. Missing percentages remain unknown.
+
+Cursor does not write local session cost logs, so Cost, Tokens, Value,
+Trend, and Overview stay empty for this provider. Subscription limits and
+local cost history remain separate sources.
+
 ## Limits
 
 Subscription limits and local cost history are separate sources. Cost, Tokens,
@@ -110,7 +135,9 @@ Connections follow the existing 5/15/30-minute polling presets. A manual refresh
 is available; Grok HTTP 429 responses enforce a 15-minute cooldown. Deselecting a
 provider cancels its pending request, and swapping positions does not fetch.
 
-Grok's CLI billing response and Antigravity's quota protocol can change.
+Grok's CLI billing response, Antigravity's quota protocol, and Cursor's
+dashboard usage endpoint can change.
+
 Fixture tests cover parsing and selection; validating authentication requires a
 signed-in CLI. Authenticated requests use HTTPS and do not follow redirects.
 
@@ -125,16 +152,17 @@ These are CodexIsland display colors, not claims about official brand palettes.
 | Claude | Terracotta | `#CC785C` |
 | Codex | Sky blue | `#5AA8F0` |
 | Grok | White | `#FFFFFF` |
+| Cursor | Steel | `#B7C4D4` |
 | Antigravity | Lilac | `#B69CFF` |
 
-Antigravity uses a separate hue from Codex so adjacent providers are recognizable
+Cursor and Antigravity use separate hues from Codex so adjacent providers are recognizable
 at a glance. Green, amber, and red remain reserved for status and alerts. Keep
 provider names and distinct marks visible so identification never depends only
 on color.
 
 ## Demo mode
 
-`CODEXISLAND_DEMO=1` also supplies synthetic Grok and Antigravity cost totals,
+`CODEXISLAND_DEMO=1` also supplies synthetic Grok, Antigravity, and Cursor cost totals,
 cumulative trends, and overview token history. VALUE uses illustrative monthly
 plan baselines ($30 and $19.99 respectively) only in demo mode. These fixtures
 never write the real cost cache or establish live subscription prices.

@@ -27,8 +27,8 @@ final class IslandModel: ObservableObject {
     let tabWidth: CGFloat = 38
 
     /// Per-side outboard slot that houses the peek-state percentage pill.
-    /// Sized for "100% · Nd Nh" worst case at the chosen pill typography
-    /// (weekly Codex windows can land at e.g. `6d 23h`). Fixed (not
+    /// Sized for "100% · 29d" worst case at the chosen pill typography
+    /// (monthly Cursor and weekly Codex windows). Fixed (not
     /// text-measured) so percentage updates don't jitter the silhouette
     /// width during refresh. Grown symmetrically on both sides regardless
     /// of which provider is visible — keeps the silhouette balanced over

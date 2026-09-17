@@ -226,6 +226,16 @@
 "%@ account options" = "%@ account options";
 "Sign in with Claude" = "Sign in with Claude";
 "Open Claude Code and run /login." = "Open Claude Code and run /login.";
+"Open Cursor" = "Open Cursor";
+"Open Cursor and sign in to connect your subscription." = "Open Cursor and sign in to connect your subscription.";
+"Open Cursor so it can refresh its session, then refresh the connection." = "Open Cursor so it can refresh its session, then refresh the connection.";
+"Could not read Cursor usage. Open Cursor, then refresh the connection." = "Could not read Cursor usage. Open Cursor, then refresh the connection.";
+"Signed in. Cursor did not report plan usage." = "Signed in. Cursor did not report plan usage.";
+"Agent" = "Agent";
+"Auto" = "Auto";
+"Included" = "Included";
+"On-demand" = "On-demand";
+"Cursor does not write local session cost logs." = "Cursor does not write local session cost logs.";
 
 "A fresh page for your week." = "A fresh page for your week.";
 "Caption copied." = "Caption copied.";

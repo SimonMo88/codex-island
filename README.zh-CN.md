@@ -70,6 +70,13 @@ Claude：
 - CodexIsland 会依次尝试 `CLAUDE_CODE_OAUTH_TOKEN`、macOS Keychain 里的 `Claude Code-credentials`，以及 Anthropic OAuth token endpoint 的刷新流程。
 - 如果都不可用，面板会显示 `auth required — run claude`。
 
+Cursor：
+
+- 先登录 Cursor 桌面应用（或对 CLI 运行 `agent login`）。
+- CodexIsland 读取 Cursor `state.vscdb` 中的 `cursorAuth/accessToken`，若为空再读取钥匙串里的 `cursor-access-token`。
+- 它只拉取当前账期的 **Agent**（指定模型）和 **Auto** 用量。凭据只读：不会刷新 OAuth，也不会写入 Cursor 的数据库。
+- 会话过期时，打开 Cursor 让它自己刷新，然后刷新连接。Cursor 没有本地会话费用日志，因此 Cost 和 Overview 保持为空。
+
 应用启动后会立即进行第一次拉取，所以你第一次悬停时通常已经能看到数据。打开设置也会触发一次刷新。
 
 ## 使用

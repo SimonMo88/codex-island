@@ -31,9 +31,7 @@ final class ProviderConnectionStore: ObservableObject {
     }
 
     func snapshot(_ provider: IslandProvider) -> ConnectedUsage {
-        snapshots[provider] ?? ConnectedUsage(message: provider == .grok
-            ? "Sign in with Grok CLI to connect your subscription."
-            : "Sign in with agy CLI to connect your subscription.", needsLogin: true)
+        snapshots[provider] ?? ConnectedUsage(message: provider.disconnectedMessage, needsLogin: true)
     }
 
     func limits(_ provider: IslandProvider) -> [ConnectedLimit] {
@@ -59,20 +57,7 @@ final class ProviderConnectionStore: ObservableObject {
         if let until = cooldown[provider], until > Date() { return }
         if !manually, let previous = lastAttempt[provider], Date().timeIntervalSince(previous) < 300 { return }
         if AppEnvironment.isDemo {
-            snapshots[provider] = ConnectedUsage(limits: [
-                ConnectedLimit(id: "demo", label: provider == .grok ? "Credits" : "5h",
-                    usedFraction: 0.38, resetAt: Date().addingTimeInterval(7200),
-                    groupLabel: provider == .grok ? nil : "Gemini Models",
-                    kind: provider == .grok ? .credits : .session)
-            ], plan: provider == .grok ? "SuperGrok" : "AI Pro", updatedAt: Date())
-            if provider == .antigravity {
-                snapshots[provider]?.limits.append(ConnectedLimit(id: "weekly", label: "week",
-                    usedFraction: 0.62, resetAt: Date().addingTimeInterval(86400),
-                    groupLabel: "Gemini Models", kind: .weekly))
-                snapshots[provider]?.limits.append(ConnectedLimit(id: "model", label: "Usage",
-                    usedFraction: 0.21, resetAt: Date().addingTimeInterval(14400),
-                    groupID: "claude", groupLabel: "Claude Models"))
-            }
+            snapshots[provider] = demoUsage(provider)
             return
         }
         loading.insert(provider)
@@ -88,11 +73,7 @@ final class ProviderConnectionStore: ObservableObject {
                 }
             }
             do {
-                let fetched = try await ProviderSessionRecovery.fetch {
-                    try await (provider == .grok ? GrokConnection.fetch() : AntigravityConnection.fetch())
-                } renew: {
-                    try await ProviderSessionRecovery.renew(provider == .grok ? "grok" : "agy")
-                }
+                let fetched = try await fetchUsage(provider)
                 guard !Task.isCancelled else { return }
                 snapshots[provider] = fetched
                 if fetched.accountID != nil || fetched.account != nil {
@@ -109,14 +90,12 @@ final class ProviderConnectionStore: ObservableObject {
                 case ProviderConnectionError.signIn, ProviderConnectionError.expired,
                      ProviderConnectionError.http(401):
                     needsLogin = true
-                    message = provider == .grok ? "Run grok login, then refresh the connection."
-                        : "Open agy CLI to restore your session, then refresh the connection."
+                    message = provider.restoreMessage
                 case ProviderConnectionError.http(429):
                     cooldown[provider] = Date().addingTimeInterval(900)
                     message = "Rate limited. Retrying in 15 minutes."
                 default:
-                    message = provider == .grok ? "Could not read Grok usage. Try refreshing the connection."
-                        : "Could not read Antigravity usage. Check your agy CLI login, then refresh."
+                    message = provider.fetchErrorMessage
                 }
                 snapshots[provider] = ConnectedUsage(message: message, needsLogin: needsLogin)
             }
@@ -124,6 +103,10 @@ final class ProviderConnectionStore: ObservableObject {
     }
 
     func connect(_ provider: IslandProvider) {
+        if provider == .cursor {
+            openCursor()
+            return
+        }
         guard provider == .grok || provider == .antigravity else { return }
         let command = provider == .grok ? "grok" : "agy"
         guard let binary = ProviderSessionRecovery.binary(command) else {
@@ -139,9 +122,64 @@ final class ProviderConnectionStore: ObservableObject {
             try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: file.path)
             NSWorkspace.shared.open(file)
         } catch {
-            snapshots[provider] = ConnectedUsage(message: provider == .grok
-                ? "Run grok login in Terminal, then refresh the connection."
-                : "Open agy CLI to restore your session, then refresh the connection.", needsLogin: true)
+            snapshots[provider] = ConnectedUsage(message: provider.restoreMessage, needsLogin: true)
         }
+    }
+
+    private func fetchUsage(_ provider: IslandProvider) async throws -> ConnectedUsage {
+        switch provider {
+        case .cursor:
+            return try await CursorConnection.fetch()
+        case .grok, .antigravity:
+            return try await ProviderSessionRecovery.fetch {
+                try await (provider == .grok ? GrokConnection.fetch() : AntigravityConnection.fetch())
+            } renew: {
+                try await ProviderSessionRecovery.renew(provider == .grok ? "grok" : "agy")
+            }
+        case .claude, .codex:
+            throw ProviderConnectionError.unavailable
+        }
+    }
+
+    private func demoUsage(_ provider: IslandProvider) -> ConnectedUsage {
+        switch provider {
+        case .cursor:
+            return ConnectedUsage(limits: [
+                ConnectedLimit(id: "agent", label: "Agent", usedFraction: 0.61,
+                    resetAt: Date().addingTimeInterval(86400 * 12), kind: .session),
+                ConnectedLimit(id: "auto", label: "Auto", usedFraction: 0.28,
+                    resetAt: Date().addingTimeInterval(86400 * 12), kind: .session)
+            ], plan: "Pro", updatedAt: Date())
+        case .grok:
+            return ConnectedUsage(limits: [
+                ConnectedLimit(id: "demo", label: "Credits", usedFraction: 0.38,
+                    resetAt: Date().addingTimeInterval(7200), kind: .credits)
+            ], plan: "SuperGrok", updatedAt: Date())
+        default:
+            var usage = ConnectedUsage(limits: [
+                ConnectedLimit(id: "demo", label: "5h", usedFraction: 0.38,
+                    resetAt: Date().addingTimeInterval(7200),
+                    groupLabel: "Gemini Models", kind: .session)
+            ], plan: "AI Pro", updatedAt: Date())
+            usage.limits.append(ConnectedLimit(id: "weekly", label: "week",
+                usedFraction: 0.62, resetAt: Date().addingTimeInterval(86400),
+                groupLabel: "Gemini Models", kind: .weekly))
+            usage.limits.append(ConnectedLimit(id: "model", label: "Usage",
+                usedFraction: 0.21, resetAt: Date().addingTimeInterval(14400),
+                groupID: "claude", groupLabel: "Claude Models"))
+            return usage
+        }
+    }
+
+    private func openCursor() {
+        let identifiers = ["com.todesktop.230313mzl4w4u92", "com.anysphere.cursor"]
+        for identifier in identifiers {
+            if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: identifier) {
+                NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                return
+            }
+        }
+        if let url = URL(string: "cursor://") { NSWorkspace.shared.open(url); return }
+        if let url = URL(string: "https://cursor.com/download") { NSWorkspace.shared.open(url) }
     }
 }

@@ -161,7 +161,7 @@ struct ProviderConnectionSection: View {
                 }
                 if signedIn {
                     Menu {
-                        Button(L10n.tr(provider == .grok ? "Sign in again…" : "Open agy CLI"), action: connect)
+                        Button(L10n.tr(provider.signInAgainTitle), action: connect)
                     } label: {
                         Image(systemName: "ellipsis").frame(width: 20, height: 28)
                     }
@@ -186,7 +186,7 @@ struct ProviderConnectionSection: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if snapshot.needsLogin {
-                        Button(L10n.tr(provider == .grok ? "Sign in with Grok CLI" : "Open agy CLI"), action: connect)
+                        Button(L10n.tr(provider.connectTitle), action: connect)
                             .controlSize(.small)
                     }
                 }

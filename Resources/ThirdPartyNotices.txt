@@ -1,3 +1,5 @@
+Cursor icon from Icons8 (https://icons8.com)
+
 Grok and Antigravity icons adapted from CodexBar
 https://github.com/steipete/CodexBar
 

@@ -57,17 +57,15 @@ enum CostBucketing {
 /// reset glyph, usage captions, and the notch peek pill so every surface
 /// speaks the same vocabulary.
 ///
-/// Buckets: `Ns` / `Nm` / `Nh` under a day; at ≥1 day, `Nd` when the hour
-/// remainder is zero, otherwise `Nd Nh` (e.g. `6d 23h`). Plain `167h` is
-/// hard to parse once weekly Codex windows replaced the old 5h limit.
+/// Buckets: `Ns` / `Nm` / `Nh` under a day; `Nd` at a day or more.
+/// Hour remainders are dropped the same way minute remainders already
+/// are (`5h`, not `5h 23m`), so a monthly Cursor reset reads `29d`
+/// next to Claude's `5h` instead of `29d 22h`.
 enum Duration {
     static func compact(_ seconds: TimeInterval) -> String {
         if seconds < 60 { return "\(Int(seconds))s" }
         if seconds < 3600 { return "\(Int(seconds / 60))m" }
         if seconds < 86400 { return "\(Int(seconds / 3600))h" }
-        let days = Int(seconds / 86400)
-        let hours = Int(seconds.truncatingRemainder(dividingBy: 86400) / 3600)
-        if hours == 0 { return "\(days)d" }
-        return "\(days)d \(hours)h"
+        return "\(Int(seconds / 86400))d"
     }
 }

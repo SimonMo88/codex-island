@@ -292,6 +292,7 @@ struct CostTile: View {
         if AppEnvironment.isDemo {
             if provider == .grok { return 30 }
             if provider == .antigravity { return 19.99 }
+            if provider == .cursor { return 20 }
         }
         let plan: String? = {
             switch provider {
@@ -299,6 +300,7 @@ struct CostTile: View {
             case .codex:  return usageStore.codex.plan?.lowercased()
             case .antigravity: return connections.snapshot(.antigravity).plan?.lowercased()
             case .grok: return connections.snapshot(.grok).plan?.lowercased()
+            case .cursor: return connections.snapshot(.cursor).plan?.lowercased()
             }
         }()
         guard let plan else { return nil }
@@ -309,6 +311,9 @@ struct CostTile: View {
         case (.codex, "prolite"): return 100
         case (.codex, "pro"):  return 200
         case (.antigravity, "google ai pro"): return 19.99
+        case (.cursor, "pro"): return 20
+        case (.cursor, "pro+"), (.cursor, "proplus"), (.cursor, "pro_plus"): return 60
+        case (.cursor, "ultra"): return 200
         default: return nil
         }
     }
@@ -320,6 +325,7 @@ struct CostTile: View {
         if AppEnvironment.isDemo {
             if provider == .grok { return "SuperGrok" }
             if provider == .antigravity { return "AI Pro" }
+            if provider == .cursor { return "Pro" }
         }
         let plan: String? = {
             switch provider {
@@ -327,6 +333,7 @@ struct CostTile: View {
             case .codex:  return usageStore.codex.plan?.lowercased()
             case .antigravity: return connections.snapshot(.antigravity).plan?.lowercased()
             case .grok: return connections.snapshot(.grok).plan?.lowercased()
+            case .cursor: return connections.snapshot(.cursor).plan?.lowercased()
             }
         }()
         guard let plan else { return nil }
@@ -337,6 +344,9 @@ struct CostTile: View {
         case (.codex, "prolite"): return "Pro"
         case (.codex, "pro"):  return "Pro"
         case (.antigravity, "google ai pro"): return "AI Pro"
+        case (.cursor, "pro"): return "Pro"
+        case (.cursor, "pro+"), (.cursor, "proplus"), (.cursor, "pro_plus"): return "Pro+"
+        case (.cursor, "ultra"): return "Ultra"
         default: return nil
         }
     }

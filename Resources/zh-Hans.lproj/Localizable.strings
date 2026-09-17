@@ -226,6 +226,16 @@
 "%@ account options" = "%@ 账户选项";
 "Sign in with Claude" = "登录 Claude";
 "Open Claude Code and run /login." = "打开 Claude Code 并运行 /login。";
+"Open Cursor" = "打开 Cursor";
+"Open Cursor and sign in to connect your subscription." = "打开 Cursor 并登录以连接你的订阅。";
+"Open Cursor so it can refresh its session, then refresh the connection." = "打开 Cursor 让它刷新会话，然后刷新连接。";
+"Could not read Cursor usage. Open Cursor, then refresh the connection." = "无法读取 Cursor 用量。请打开 Cursor，然后刷新连接。";
+"Signed in. Cursor did not report plan usage." = "已登录。Cursor 未返回套餐用量。";
+"Agent" = "Agent";
+"Auto" = "Auto";
+"Included" = "包含额度";
+"On-demand" = "按需";
+"Cursor does not write local session cost logs." = "Cursor 不会写入本地会话费用日志。";
 
 "A fresh page for your week." = "新一周，从这里开始。";
 "Caption copied." = "文案已复制。";

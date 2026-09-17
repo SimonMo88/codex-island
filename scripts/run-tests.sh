@@ -160,6 +160,21 @@ swiftc \
 
 swiftc \
   -parse-as-library \
+  -lsqlite3 \
+  -o "$OUT_DIR/cursor-connection-tests" \
+  Sources/Model/IslandProvider.swift \
+  Sources/Model/UsageDisplayModeStore.swift \
+  Sources/Usage/AppUsage.swift \
+  Sources/Model/ProviderQuotaPreferences.swift \
+  Sources/Usage/ConnectedUsage.swift \
+  Sources/Usage/GrokConnection.swift \
+  Sources/Usage/CursorConnection.swift \
+  Tests/CursorConnectionTests.swift
+
+"$OUT_DIR/cursor-connection-tests"
+
+swiftc \
+  -parse-as-library \
   -o "$OUT_DIR/local-provider-cost-tests" \
   Sources/Cost/TokenEvent.swift \
   Sources/Cost/LocalCostScan.swift \

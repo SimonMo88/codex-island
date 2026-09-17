@@ -30,7 +30,7 @@ final class CostStore: ObservableObject {
         switch provider {
         case .claude: return claude
         case .codex: return codex
-        case .grok, .antigravity:
+        case .grok, .antigravity, .cursor:
             return connectedCosts[provider] ?? ProviderCost(
                 today: .unavailable(label: "Today", reason: "Local usage has not been loaded"),
                 month: .unavailable(label: CostBucketing.currentMonthLabel(), reason: "Local usage has not been loaded"))
@@ -41,7 +41,7 @@ final class CostStore: ObservableObject {
         switch provider {
         case .claude: return claudeLoading
         case .codex: return codexLoading
-        case .grok, .antigravity: return connectedLoading.contains(provider)
+        case .grok, .antigravity, .cursor: return connectedLoading.contains(provider)
         }
     }
 
@@ -92,6 +92,12 @@ final class CostStore: ObservableObject {
                 await self?.commitLocal(cost, scan: scan, provider: provider, saveError: saved.saveError)
             }
         }
+        let cursorNotice = "Cursor does not write local session cost logs."
+        connectedCosts[.cursor] = ProviderCost(
+            today: .unavailable(label: "Today", reason: cursorNotice),
+            month: .unavailable(label: CostBucketing.currentMonthLabel(), reason: cursorNotice))
+        localNotices[.cursor] = cursorNotice
+        connectedUpdated[.cursor] = Date()
         // Only scan OpenCode when at least one provider will consume
         // the result; avoids wasted I/O when both are already loading.
         let openCodeTask: Task<UsageLedger.Snapshot, Never>?
@@ -239,7 +245,7 @@ final class CostStore: ObservableObject {
                 175, 188, 201, 214, 228, 239, 254, 268, 282, 164,
             ], millionScale: 1_000_000, apiDollarsPerMillion: 0.832)
         )
-        for (provider, scale) in [(IslandProvider.grok, 0.32), (.antigravity, 0.24)] {
+        for (provider, scale) in [(IslandProvider.grok, 0.32), (.antigravity, 0.24), (.cursor, 0.18)] {
             func scaled(_ window: CostWindow) -> CostWindow {
                 CostWindow(dollars: window.dollars * scale,
                            tokens: Int(Double(window.tokens) * scale),
@@ -386,6 +392,7 @@ extension IslandProvider {
         case .codex: return .codex
         case .grok: return .grok
         case .antigravity: return .antigravity
+        case .cursor: return .cursor
         }
     }
 }

@@ -19,6 +19,7 @@ extension IslandProvider {
         case .codex: return IslandColor.codex
         case .grok: return IslandColor.grok
         case .antigravity: return IslandColor.antigravity
+        case .cursor: return IslandColor.cursor
         }
     }
     var legacy: AlertEngine.Provider? {
@@ -37,6 +38,7 @@ struct ProviderMark: View {
 
     private static let grok = Bundle.main.url(forResource: "grok_logo", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
     private static let antigravity = Bundle.main.url(forResource: "antigravity_logo", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
+    private static let cursor = Bundle.main.url(forResource: "cursor_logo", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
 
     private var image: NSImage? {
         switch provider {
@@ -44,19 +46,25 @@ struct ProviderMark: View {
         case .codex: return Self.codex
         case .grok: return Self.grok
         case .antigravity: return Self.antigravity
+        case .cursor: return Self.cursor
         }
     }
 
     var body: some View {
         Group {
             if let image {
-                Image(nsImage: image).resizable().renderingMode(.template).scaledToFit()
+                if provider == .cursor {
+                    Image(nsImage: image).resizable().scaledToFit()
+                } else {
+                    Image(nsImage: image).resizable().renderingMode(.template).scaledToFit()
+                        .foregroundStyle(provider.color)
+                }
             } else {
                 Image(systemName: provider == .grok ? "asterisk" : "a.circle")
                     .resizable().scaledToFit()
+                    .foregroundStyle(provider.color)
             }
         }
-        .foregroundStyle(provider.color)
         .frame(width: 20, height: 20)
         .accessibilityLabel(provider.name)
     }

@@ -13,6 +13,9 @@ enum IslandColor {
 
     static let grok = Color.white
 
+    // App identity tint: separates Cursor from Codex blue, Antigravity lilac, and status colors.
+    static let cursor = Color(red: 183/255, green: 196/255, blue: 212/255)
+
     // App identity tint: separates Antigravity from Codex blue and status colors.
     static let antigravity = Color(red: 182/255, green: 156/255, blue: 255/255)
 

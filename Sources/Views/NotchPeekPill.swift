@@ -5,7 +5,7 @@ import SwiftUI
 /// directly on the dark silhouette, like the logos.
 ///
 /// Renders one of three states:
-///   • value:    "32% · 2h" / "0% · 6d 23h" (active countdown) or
+///   • value:    "32% · 2h" / "0% · 6d" (active countdown) or
 ///               "0% · 5h" (window-length fallback at lower opacity when no
 ///               active resetAt is known)
 ///   • loading:  small pulsing dot (only when `loading && usedPercent == 0`)
@@ -81,7 +81,7 @@ struct NotchPeekPill: View {
     private var resetLabel: some View {
         Text(resetText ?? windowLengthFallback)
             .font(Typography.bodyNumber)
-            .foregroundStyle(.white.opacity(resetText == nil ? 0.45 : 0.70))
+            .foregroundStyle(effectiveTint.opacity(resetText == nil ? 0.45 : 1))
     }
 
     /// Brand tint by default; alert color when above threshold so the
@@ -115,7 +115,7 @@ struct NotchPeekPill: View {
         "\(usage.displayedPercentInt(mode: usageDisplay.mode))%"
     }
 
-    /// Shared compact countdown (`Nm` / `Nh` / `Nd Nh`). Returns nil if
+    /// Shared compact countdown (`Nm` / `Nh` / `Nd`). Returns nil if
     /// there's no resetAt or the reset has already passed (happens
     /// transiently when a window rolls over before the next fetch lands).
     private var resetText: String? {

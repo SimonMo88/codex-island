@@ -11,7 +11,7 @@ struct ConnectedUsageBlock: View {
         let limits = connections.limits(provider)
         Group {
             if !snapshot.needsLogin && limits.contains(where: { $0.usedFraction != nil }) {
-                UsageChartsRow(color: provider.color, style: style.style, seed: provider == .grok ? 5 : 7,
+                UsageChartsRow(color: provider.color, style: style.style, seed: provider == .grok ? 5 : provider == .cursor ? 9 : 7,
                     metrics: limits.map { limit in
                         UsageChartMetric(id: limit.id, label: limit.label, window: limit.window,
                                          historyKey: snapshot.historyKey(provider: provider, limit: limit))

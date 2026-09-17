@@ -37,11 +37,13 @@ SU_FEED_URL="${SU_FEED_URL:-https://github.com/ericjypark/codex-island/releases/
 rm -rf "$BUILD_DIR"
 mkdir -p "$MACOS_DIR" "$RES_DIR" "$FRAMEWORKS_DIR"
 
+echo "copying resources"
 cp ./Resources/claude_logo.pdf "$RES_DIR/claude_logo.pdf"
 cp ./Resources/openai_logo.pdf "$RES_DIR/openai_logo.pdf"
 cp ./Resources/grok_logo.png "$RES_DIR/grok_logo.png"
 cp ./Resources/ThirdPartyNotices.txt "$RES_DIR/ThirdPartyNotices.txt"
 cp ./Resources/antigravity_logo.png "$RES_DIR/antigravity_logo.png"
+cp ./Resources/cursor_logo.png "$RES_DIR/cursor_logo.png"
 cp ./Resources/codexisland_logo.png "$RES_DIR/codexisland_logo.png"
 cp ./Resources/CodexIsland.icns "$RES_DIR/CodexIsland.icns"
 cp ./scripts/recover-claude-usage.sh "$RES_DIR/recover-claude-usage.sh"
@@ -61,6 +63,7 @@ X86_64_BIN="$BUILD_DIR/$APP_NAME-x86_64"
 for arch_pair in "arm64:$ARM64_BIN" "x86_64:$X86_64_BIN"; do
   arch="${arch_pair%%:*}"
   out="${arch_pair##*:}"
+  echo "compiling ${arch}..."
   swiftc \
     -target "${arch}-apple-macos${DEPLOYMENT_TARGET}" \
     -O \
@@ -75,6 +78,7 @@ for arch_pair in "arm64:$ARM64_BIN" "x86_64:$X86_64_BIN"; do
     $SWIFT_SOURCES
 done
 
+echo "merging universal binary"
 lipo -create "$ARM64_BIN" "$X86_64_BIN" -output "$MACOS_DIR/$APP_NAME"
 rm "$ARM64_BIN" "$X86_64_BIN"
 
@@ -111,6 +115,7 @@ EOF
 # varied across Sparkle versions. Gate on path existence (so missing helpers
 # don't fail the build) and propagate any real codesign error — silencing
 # them lets "Updater failed to start" reach end users at Check Now time.
+echo "signing Sparkle"
 XPC_DIR="$FRAMEWORKS_DIR/Sparkle.framework/Versions/Current/XPCServices"
 for xpc in Installer.xpc Downloader.xpc; do
   XPC_PATH="$XPC_DIR/$xpc"

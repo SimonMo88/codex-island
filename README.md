@@ -182,6 +182,19 @@ For Claude:
   token.
 - If none work, the panel shows `auth required — run claude`.
 
+For Cursor:
+
+- Sign in to the Cursor desktop app (or `agent login` for the CLI).
+- CodexIsland reads `cursorAuth/accessToken` from Cursor's
+  `state.vscdb`, then the `cursor-access-token` keychain item if the
+  desktop store is empty.
+- It polls Cursor's current-period dashboard for **Agent** (named model)
+  and **Auto** usage. Credential access is read-only: the app never
+  refreshes OAuth tokens or writes Cursor's database.
+- If the session is expired, open Cursor so it can refresh itself, then
+  refresh the connection. Cost and Overview stay empty because Cursor
+  does not write local session cost logs.
+
 The first fetch starts at app launch so the panel usually has values ready by
 the first peek. Opening Settings also triggers a fresh fetch.
 

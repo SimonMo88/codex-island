@@ -548,7 +548,7 @@ enum ClaudeCredentials {
         guard let path = locateClaudeBinary() else { return false }
         let task = Process()
         task.launchPath = path
-        task.arguments = ["-p", "ok", "--model", "haiku", "--strict-mcp-config"]
+        task.arguments = ["-p", "ok", "--model", "haiku", "--strict-mcp-config", "--no-session-persistence"]
         task.currentDirectoryPath = NSHomeDirectory()
         // Deterministic auth path: the ping exists to refresh the KEYCHAIN
         // login and must never bill anything. Drop the env overrides that
